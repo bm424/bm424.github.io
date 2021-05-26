@@ -2,6 +2,14 @@ body {
   font-family: 'Raleway', sans-serif;
 }
 
+a {
+  color: inherit;
+}
+
+a:focus {
+  outline: none;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Montserrat', sans-serif;
 }
@@ -10,7 +18,32 @@ h1.post-title {
   font-size: xx-large;
 }
 
+h1.post-title small {
+  font-size: large;
+  color: darkgray;
+}
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+  text-decoration: none;
+}
+
+h1 a:link::before, h2 a:link::before, h3 a:link::before, h4 a:link::before, h5 a:link::before, h6 a:link::before {
+  content: '# ';
+}
+
+h1 a:focus::before, h2 a:focus::before, h3 a:focus::before, h4 a:focus::before, h5 a:focus::before, h6 a:focus::before {
+  content: '>> ';
+}
+
+h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover, h6 a:hover {
+  text-decoration: underline;
+}
+
 main {
-  width: 600px;
-  margin-left: 60px;
+  max-width: 600px;
+  margin-left: 1rem;
+}
+
+article {
+  margin-bottom: 4rem;
 }

@@ -5,13 +5,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Raleway&display=swap" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
     <main>
       {% for post in post_list|sort(attribute="date", reverse=true) %}
       <article>
         <h1 class="post-title">
-          {{ post.title }}
+          <a id="{{ post.slug }}" href="#{{ post.slug }}">{{ post.title }}</a>
           {% if post.date %}
             <small>{{ post.date.strftime("%Y-%m-%d") }}</small>
           {% endif %}

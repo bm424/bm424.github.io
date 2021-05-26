@@ -12,7 +12,7 @@ logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.INFO)
 
-MarkdownFilePost = collections.namedtuple("MarkdownFilePost", ["title", "date", "html"])
+MarkdownFilePost = collections.namedtuple("MarkdownFilePost", ["title", "date", "html", "slug"])
 
 def main():
     log.info("Starting")
@@ -37,6 +37,7 @@ def main():
             title=markdown_file_title,
             date=dateutil.parser.parse(markdown_file_date) if markdown_file_date else None,
             html=markdown_file_html,
+            slug=markdown_file_name,
         )
         markdown_file_post_list.append(markdown_file_post)
         with open(f"build/{markdown_file_name}.html", "w") as html_file:
