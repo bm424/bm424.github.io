@@ -1,5 +1,5 @@
 Title: Build Day 1
-Date: 2021-05-26
+Date: 2021-05-23
 ---
 # import
 
@@ -22,3 +22,10 @@ should be a simple case of deploying to GitHub pages.
 
 I say that. I've done it before, but quite a long time ago (my company uses
 GitLab, so I'm a little out of practice)... so see you in the next entry.
+
+# wraps()
+
+I've slightly backdated this post because these reflections were based on the
+hour or two of work I did after writing the first day's post a couple of days
+ago, and I want to spend a bit of time after today (2021-05-26) reflecting
+on today's work instead. Just for transparency's sake...

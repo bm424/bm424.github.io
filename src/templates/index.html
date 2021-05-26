@@ -8,8 +8,16 @@
   </head>
   <body>
     <main>
-      {% for html in html_list %}
-        {{ html|safe }}
+      {% for post in post_list|sort(attribute="date", reverse=true) %}
+      <article>
+        <h1 class="post-title">
+          {{ post.title }}
+          {% if post.date %}
+            <small>{{ post.date.strftime("%Y-%m-%d") }}</small>
+          {% endif %}
+        </h1>
+        {{ post.html|safe }}
+      </article>
       {% endfor %}
     </main>
   </body>

@@ -4,11 +4,15 @@ import logging
 import sys
 import pathlib
 import shutil
+import collections
+import dateutil.parser
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.INFO)
+
+MarkdownFilePost = collections.namedtuple("MarkdownFilePost", ["title", "date", "html"])
 
 def main():
     log.info("Starting")
@@ -22,12 +26,19 @@ def main():
 
     log.info("Rendering markdown files...")
 
-    markdown_file_html_list = []
+    markdown_file_post_list = []
     for markdown_file_path, markdown_file_name in zip(markdown_file_path_list, markdown_file_name_list):
         with open(markdown_file_path, "r") as markdown_file:
             markdown_file_content = markdown_file.read()
         markdown_file_html = md.convert(markdown_file_content)
-        markdown_file_html_list.append(markdown_file_html)
+        markdown_file_title = md.Meta.get("title", [None])[0]
+        markdown_file_date = md.Meta.get("date", [None])[0]
+        markdown_file_post = MarkdownFilePost(
+            title=markdown_file_title,
+            date=dateutil.parser.parse(markdown_file_date) if markdown_file_date else None,
+            html=markdown_file_html,
+        )
+        markdown_file_post_list.append(markdown_file_post)
         with open(f"build/{markdown_file_name}.html", "w") as html_file:
             html_file.write(markdown_file_html)
 
@@ -39,7 +50,7 @@ def main():
     )
 
     index_template = environment.get_template("index.html")
-    index_html = index_template.render(html_list=markdown_file_html_list)
+    index_html = index_template.render(post_list=markdown_file_post_list)
     with open("build/index.html", "w") as index_file:
         index_file.write(index_html)
 
