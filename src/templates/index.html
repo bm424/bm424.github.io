@@ -12,9 +12,11 @@
       {% for post in post_list|sort(attribute="date", reverse=true) %}
       <article>
         <h1 class="post-title">
-          <a id="{{ post.slug }}" href="#{{ post.slug }}">{{ post.title }}</a>
+          <span class="line">
+            <a id="{{ post.slug }}" href="#{{ post.slug }}">{{ post.title }}</a>
+          </span>
           {% if post.date %}
-            <small>{{ post.date.strftime("%Y-%m-%d") }}</small>
+            <span class="line"><small>{{ post.date.strftime("%Y-%m-%d") }}</span></small>
           {% endif %}
         </h1>
         {{ post.html|safe }}
