@@ -1,0 +1,5 @@
+name: "Docker Build"
+description: 'Builds site from source files using Docker'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
