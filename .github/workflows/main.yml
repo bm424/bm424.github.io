@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build
-        uses: bm424/bm424.github.io/actions/docker-build
+        uses: bm424/bm424.github.io/actions/docker-build@v1
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
