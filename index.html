@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+  <head>
+    <title>bm424</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Raleway&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <main>
+      
+      <article>
+        <h1 class="post-title">
+          <span class="line">
+            <a id="build_day_4" href="#build_day_4">Build Day 4</a>
+          </span>
+          
+            <span class="line"><small>2021-05-27</span></small>
+          
+        </h1>
+        <h1>commit</h1>
+<p>Today we publish. The plan is to use GitHub pages, which at first glance seemed
+pretty simple but none of the documentation immediately points to hwo to run
+the repo through a build process before publication. So finding that out is
+the immediate priority.</p>
+<hr />
+<p>Half an hour in and this is not nearly as easy as I expected. It seems these
+custom builds just aren't really a part of the GitHub ecosystem and... I get
+that... but I really think it ought to be achievable with GitHub actions.</p>
+      </article>
+      
+      <article>
+        <h1 class="post-title">
+          <span class="line">
+            <a id="build_day_2" href="#build_day_2">Build Day 2</a>
+          </span>
+          
+            <span class="line"><small>2021-05-26</span></small>
+          
+        </h1>
+        <h1>print()</h1>
+<p>So, main changes today include adding support for each posts's metadata,
+handling multiple posts building to the same page in the correct order,
+and some small updates to improve the site's aesthetics including some
+page hierarchy and correct scaling on mobile.</p>
+<p>One of the things I find it's really important to do, particularly in personal
+projects, is write a few notes to yourself to remind you simply what commands
+to write to get things working again. It sounds obvious, but a lot of the actual
+minutes spent on a programming project for me are spent working out the correct
+order of operations.</p>
+<p>For this project, the relevant command is a simple
+<code>docker-compose build &amp;&amp; docker-compose run main</code>
+but in a web project with multiple moving parts these kinds of crucial lines
+can be easy to forget or get lost in a maze of possible, often redundant (in
+the sense of overlapping functionality) scripts. So when I write a README file,
+it's as much for me as for anyone else who might pick up the project.</p>
+<h1>.split()</h1>
+<p>One thing that came up while coding today was the issue of post permalinks.
+I'm not even going to <em>attempt</em> to go there. The quick solution I settled on
+was to link to the posts using the file name. As I anticipate I'll be changing
+those much less than the titles of the posts, they ought to be permanent enough,
+and they map to the titles sufficiently closely to be sensible in the URL.</p>
+<p>Come to think of it, this may be similar to what professional static site
+generators do, given the mismatch between URLs and post titles that I sometimes
+see.</p>
+<p>On an unrelated note, using a NamedTuple was a good way to pass values into
+the Jinja templates quickly, but it's quickly showing its limitations. I've
+been using Pydantic a lot at work and I like it a lot, we'll see if I need to
+get it involved here, depending on how much the complexity of the NamedTuple
+structure increases.</p>
+<h1>:focus</h1>
+<p>To wrap up, I spent a fair bit of time faffing around with the style of the
+anchor links to the posts. This is actually the kind of thing I tend to find
+really fun, because webpage style is one of the ways it's easy to get a little
+creative in projects like this. That said, I often get carried away in style
+over substance. Part of this project is to focus on getting the content out,
+rather than perfecting style, so with these final changes I'm going to call
+it a day and implement the GitHub pages build another time.</p>
+      </article>
+      
+      <article>
+        <h1 class="post-title">
+          <span class="line">
+            <a id="build_day_1" href="#build_day_1">Build Day 1</a>
+          </span>
+          
+            <span class="line"><small>2021-05-23</span></small>
+          
+        </h1>
+        <h1>import</h1>
+<p>A couple of hours later and we have a working static site builder running
+locally using Docker, Python, Jinja2, markdown, and not much else. On the
+whole I'm pretty happy with the timing, particularly considering a fairly
+significant chunk of that was actually writing the build day 0 content.</p>
+<p>I initially thought I'd be needing a running server to see changes live, but
+quickly realised that was going to be unnecessary - the Docker rebuild was
+more than quick enough to get a fast feedback loop going, and the most
+fiddly bit, the CSS, I could actually just do in the build styles, refreshing
+the page in the meantime, then copy back into the source when done.</p>
+<h1>next()</h1>
+<p>Simple enough so far. However, having now added this next file, I need to make
+a couple of changes to ensure one can navigate to past entries, and then it
+should be a simple case of deploying to GitHub pages.</p>
+<p>I say that. I've done it before, but quite a long time ago (my company uses
+GitLab, so I'm a little out of practice)... so see you in the next entry.</p>
+<h1>wraps()</h1>
+<p>I've slightly backdated this post because these reflections were based on the
+hour or two of work I did after writing the first day's post a couple of days
+ago, and I want to spend a bit of time after today (2021-05-26) reflecting
+on today's work instead. Just for transparency's sake...</p>
+      </article>
+      
+      <article>
+        <h1 class="post-title">
+          <span class="line">
+            <a id="build_day_0" href="#build_day_0">Build Day 0</a>
+          </span>
+          
+            <span class="line"><small>2021-05-23</span></small>
+          
+        </h1>
+        <h1>def</h1>
+<p>All projects begin somewhere, and this is where this one begins.</p>
+<p>Over the next few weeks and months, I'll be building a personal
+portfolio/showcase of code projects, each chosen for both personal interest
+and to demonstrate my use of particular technologies, such as the web stack,
+machine learning, or programming interface development.</p>
+<h1>__doc__</h1>
+<p>Why?</p>
+<p>Well, firstly, a lot of the code I write is for the company I work for,
+and so while the things I can do has expanded significantly over the last few
+years, none of it is particularly reflected in my GitHub profile, and I'd like
+to bring that up to date.</p>
+<p>Secondly, I want to create a coding space for myself that is less restricted
+by deadlines and "product" pressure, to try and focus on best practices,
+and to exercise older programming skills I used to use regularly (such as
+in training neural networks).</p>
+<p>And lastly, I think the projects I've lined up are going to be a lot of fun,
+and by tackling some of them I hope I can rekindle my enthusiasm for hobbyist
+programming.</p>
+<h1>__call__</h1>
+<p>So what are these projects to be? In order of increasing complexity:</p>
+<ol>
+<li>This! A simple static site generator, from scratch, written in Python and
+   markdown, where I can record my progress and thoughts on each project
+   as I go.</li>
+<li>A bit of a personal exercise, writing a simple Schrödinger equation
+   solver in Python, with graphical output. If it goes well, I'll convert
+   it into a web app.</li>
+<li>A dinosaur family tree/cladogram, implemented as a web app using React
+   and/or Redux, interactive, searchable, and live on the web.</li>
+<li>A board game, called Bao, which I learned as a kid on holiday in Zanzibar,
+   implemented in Rust using Bevy.</li>
+<li>An open street map tile neural network tile generator, implemented in
+   Python and, if all goes well, deployed as a web app.</li>
+</ol>
+<h1>__exit__</h1>
+<p>This particular post was written before any code, and represents simply
+the starting point for project 1. Next post, I'll be writing up reflections
+on the implementation of this little custom static site generator. If you've
+read this far, thanks! And see you next time.</p>
+      </article>
+      
+    </main>
+  </body>
+</html>
