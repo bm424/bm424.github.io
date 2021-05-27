@@ -8,7 +8,7 @@ the immediate priority.</p>
 custom builds just aren't really a part of the GitHub ecosystem and... I get
 that... but I really think it ought to be achievable with GitHub actions.</p>
 <h1>tag</h1>
-<p>And another half an hour later and we're live at https://bm424.github.io/ !
+<p>And another half an hour later and we're live at <a href="https://bm424.github.io/">bm424.github.io</a>!
 Turned out to be not that difficult, just a heavy reliance on existing published
 actions, which isn't something I'm very used to.</p>
 <p>I'm going to write down what happened for my own future reference.</p>
@@ -16,7 +16,7 @@ actions, which isn't something I'm very used to.</p>
 <p>There are three basic steps needed:</p>
 <ol>
 <li>Checkout your own repository. This is accomplished using the public
-   "checkout" action, visitable (here)[https://github.com/actions/checkout].
+   "checkout" action, visitable <a href="https://github.com/actions/checkout">here</a>.
    This is surprising to me, as I'd have assumed this was more or less an
    automatic part of the process, but I suppose explicitly doing this is better
    than implicitly assuming it.</li>
@@ -27,10 +27,11 @@ actions, which isn't something I'm very used to.</p>
    built first time, although I was a little confused about where the action
    was supposed to live (turns out top-level in the repo is fine).</li>
 <li>Use yet another public image, this one sourced from a nice little tutorial
-   (here)[https://www.pluralsight.com/guides/how-to-host-your-static-webpages-on-github-pages],
+   <a href="https://www.pluralsight.com/guides/how-to-host-your-static-webpages-on-github-pages">here</a>,
    to push the site to your branch. A quick skim through the source code
    suggests this does much of the same manual stuff one might have implemented
    (git push to branch etc) but packaged up nice.</li>
 </ol>
 <p>Moving forward, I'm hoping I'll remember to refer to this repo as a canonical
 example for myself.</p>
+<p>Until next time.</p>
