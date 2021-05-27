@@ -9,9 +9,9 @@ jobs:
     name: Builds site to directory
     steps:
       - uses: actions/checkout@v2
+      - run: mkdir build
       - name: Build
         uses: bm424/bm424.github.io@v1
-      - run: mkdir build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
