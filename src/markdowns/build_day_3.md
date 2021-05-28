@@ -1,10 +1,10 @@
-Title: Build Day 4
+Title: Build Day 3
 Date: 2021-05-27 22:00
 ---
 # commit
 
 Today we publish. The plan is to use GitHub pages, which at first glance seemed
-pretty simple but none of the documentation immediately points to hwo to run
+pretty simple but none of the documentation immediately points to how to run
 the repo through a build process before publication. So finding that out is
 the immediate priority.
 
