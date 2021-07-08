@@ -1,0 +1,43 @@
+<p>So; a couple of months later, a glass of wine in hand, with football apparently coming home, I'd like to reflect a little on why there has been such a long break between Build Days 3 and 4, and think a little bit more critically about some of the projects that I'd like to tackle going forward.</p>
+<p>I'd started right away on the next project.
+The plan was (seemed) quite simple.
+I wanted a webapp - something to flex the old TypeScript muscles - which would be a searchable, interactive view of the whole Dinosaur family tree, starting with the earliest proto-dinosaurs and running through to the last species left alive when the meteorite hit.
+I've always had an interest in dinosaurs (especially when younger - my mum once sent me in on a dress-up day as a paleontologist) and it seemed like a fun way to revisit some of that while having a go at a new build that I don't think has been attempted before.
+How naïve I was.</p>
+<p>Let me break down a couple of the challenges I faced.</p>
+<h1>1. The Challenge of Trees</h1>
+<p>I love me a tree structure.
+I guess you could call me a linear algebraist by training (my PhD focused on things like <a href="https://en.wikipedia.org/wiki/Non-negative_matrix_factorization">NMF</a> and data clustering) so graphs, nodes, and trees are something of a new language to me, but I've been using heirarchical structures for some frontend stuff at work and thinking about tree types in TypeScript got me really interested.
+Feeling complacent (a family tree is just a tree, right?) I immediately charged down the route of encoding all the different taxonomic ranks (Genus, Class, Phylum and so on) as nodes in my future tree structure.</p>
+<p>That idea fell apart pretty quickly, because as soon as I started looking at how to structure the actual <em>cladograms</em> (new bit of vocab for me there), I realised that many, if not most nodes didn't actually have a taxonomic rank ascribed to them.
+Thinking back, that makes total sense.
+The classification of a species clearly doesn't depend strictly on its actual evolution.
+If that were true, then any given dinosaur species would simply have fewer entries in its classification tree than a modern animal.
+The classification is actually <em>closer</em> to the vector/cluster description of a species than its family tree description.</p>
+<p>Instead of simply grouping by phylum/class/order/family/genus/species, I'd have to take a much more sophisticated approach to encoding the family tree of each dinosaur.
+No problem; more work, no doubt, and a less nicely-structured output (lots of nesting necessary) but doable.</p>
+<p>I quickly ran into challenge 2.</p>
+<h1>2. The Challenge of Actual Science™</h1>
+<p>Although I'd anticipated challenges like the one above (it's a technical problem, after all, and creating good data structures is part of all coding) this next problem was not only the one that's slightly scuppered the project, but one I totally failed to see coming.</p>
+<p>It turns out that - shockedpikachu.jpg - science isn't done.
+In other words, there is <em>ongoing research</em> into the family trees of dinosaurs.
+I know!</p>
+<p>I'd decided to start small, work on the Lambeosauridae family first to nail down the interface and the data structures before working in the rest of the group.
+It was going well - I'd marshalled a small set of species, arranged a tree for them, and was about ready to start coding up the frontend when I realised there was going to be a real logical problem.</p>
+<p>What happens when scientists disagree about the tree?</p>
+<p>Naively I thought I might be able to present a menu of options to the end user.
+"Would you like Prieto-Marquez 2013 or 2015 [citation]?"
+That by itself would be fine apart from the problem of tree-hopping species.
+Depending on who you talk to, for instance, <a href="https://en.wikipedia.org/wiki/Arenysaurus">Arenysaurus</a> is either <em>deep</em> into the Lambeosaurini tribe <em>or</em> totally outside it!
+Crazy!</p>
+<p>Nightmare!</p>
+<p>From a coding perspective this does actually pose some serious logical problems.
+Let's say I've picked (higher up the tree) some cladogram proposed which shuffles around the Lambeosaurini tribe.
+We then have no way of knowing which of the two proposed cladograms for Arenysaurus is compatible.
+It's simply not possible to reconcile the trees.</p>
+<h1>What's to be done?</h1>
+<p>Now if I were going to be <em>really</em> sophisticated, I could take some of the algorithms that are used to <em>generate</em> the cladograms and expose <em>those</em> to the end-user.
+That way, they could rearrange the whole tree at will in a nice interactive manner, and moreover perhaps explore some of the interesting differences between them.</p>
+<p>That, however, is a much bigger project than I can take on (though the prospect of a second PhD <em>is</em> tempting).
+For now, I'm going to have to let sleeping dinosaurs lie, and instead have a crack at something more manageable.</p>
+<p>Until the next one, whenever that is.</p>
