@@ -16,3 +16,6 @@ However, there are some really nice interactive components we can build here and
 
 I'll probably next write when I've got a working prototype, because for now the whole thing is very much in the set-up phase.
 Until then.
+
+Note to self: build a table of contents for this page as well.
+Perhaps even some smooth scrolling, idk.
