@@ -17,7 +17,7 @@ MarkdownFilePost = collections.namedtuple("MarkdownFilePost", ["title", "date", 
 def main():
     log.info("Starting")
 
-    md = markdown.Markdown(extensions=["meta"])
+    md = markdown.Markdown(extensions=["meta", "fenced_code", "codehilite"])
     markdown_file_path_list = glob.glob("src/markdowns/*.md")
     markdown_file_name_list = [pathlib.Path(markdown_file_path).stem for markdown_file_path in markdown_file_path_list]
 

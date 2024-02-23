@@ -2,3 +2,4 @@ livereload~=2.6.3
 markdown~=3.3.4
 Jinja2~=3.0.1
 python-dateutil~=2.8.1
+Pygments~=2.17.2

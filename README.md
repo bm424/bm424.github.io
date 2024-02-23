@@ -1,7 +1,7 @@
 # Local Build
 
 ```
-docker-compose build && docker-compose run main
+docker compose build && docker compose run main
 ```
 
 # Deployment details
