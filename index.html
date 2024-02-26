@@ -42,53 +42,53 @@ the graph:</p>
 </ol>
 <p>How we choose to implement these features is up to us. I’ve chosen to implement the test for emptiness as a property of
 the graph, and the context extraction as a method <code>.pop(node: Optional[Node])</code> on the graph:</p>
-<pre class="codehilite"><code class="language-python">class Graph(abc.ABC, typing.Generic[A, B]):
-    ...
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
 
-    @property
-    @abc.abstractmethod
-    def is_empty(self) -&gt; bool:
-        &quot;&quot;&quot;True if the graph is empty (contains no nodes), False otherwise.&quot;&quot;&quot;
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;True if the graph is empty (contains no nodes), False otherwise.&quot;&quot;&quot;</span>
 
-    @abc.abstractmethod
-    def pop(self, node: Node | None = None) -&gt; tuple[Context[A, B], &quot;Graph[A, B]&quot;] | None:
-        &quot;&quot;&quot;Extracts a given `node` from the graph.
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Context</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="s2">&quot;Graph[A, B]&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extracts a given `node` from the graph.</span>
 
-        Returns the node's context, and the remaining graph. If `node` is None, any
-        node may be extracted. If `node` is not in the graph, returns None.
-        &quot;&quot;&quot;
-</code></pre>
+<span class="sd">        Returns the node&#39;s context, and the remaining graph. If `node` is None, any</span>
+<span class="sd">        node may be extracted. If `node` is not in the graph, returns None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</code></pre></div>
 
 <p>Now let’s implement these for our subtypes! For the empty graph, it’s easy enough:</p>
-<pre class="codehilite"><code class="language-python">class EmptyGraph(Graph[A, B]):
-    ...
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">EmptyGraph</span><span class="p">(</span><span class="n">Graph</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
 
-    @property
-    def is_empty(self) -&gt; bool:
-        return True
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
-    def pop(self, node: Node | None = None) -&gt; tuple[Context[A, B], &quot;Graph[A, B]&quot;] | None:
-        return None
-</code></pre>
+    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Context</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="s2">&quot;Graph[A, B]&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+</code></pre></div>
 
 <p>The empty graph is, obviously, empty, and we can never extract any context from it.</p>
 <p>The inductive graph implementation is more complicated:</p>
-<pre class="codehilite"><code class="language-python">class InductiveGraph(Graph[A, B]):
-    ...
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">InductiveGraph</span><span class="p">(</span><span class="n">Graph</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
 
-    @property
-    def is_empty(self) -&gt; bool:
-        return False
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
-    def pop(self, node: Node | None = None) -&gt; tuple[Context[A, B], &quot;Graph[A, B]&quot;] | None:
-        if node is None or node == self.head.node:
-            return self.head, self.tail
-        node_context, graph_context = self.head.pop(node)
-        if match := self.tail.pop(node):
-            sub_node_context, subgraph = match
-            return node_context | sub_node_context, graph_context &amp; subgraph
-        return None
-</code></pre>
+    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Context</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="s2">&quot;Graph[A, B]&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">node</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">node</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tail</span>
+        <span class="n">node_context</span><span class="p">,</span> <span class="n">graph_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+            <span class="n">sub_node_context</span><span class="p">,</span> <span class="n">subgraph</span> <span class="o">=</span> <span class="n">match</span>
+            <span class="k">return</span> <span class="n">node_context</span> <span class="o">|</span> <span class="n">sub_node_context</span><span class="p">,</span> <span class="n">graph_context</span> <span class="o">&amp;</span> <span class="n">subgraph</span>
+        <span class="k">return</span> <span class="kc">None</span>
+</code></pre></div>
 
 <p>Let’s dig into <code>pop</code> here.</p>
 <p>First, if <code>node</code> is <code>None</code>, it means we can return any arbitrary context alongside the remaining graph. The way we’ve
@@ -130,10 +130,10 @@ do that now!</p>
 programming, and
 <code>ufold</code> means the fold on graphs is "unordered," because the nodes are, in general, traversed in arbitrary order.</p>
 <p>The paper describes the <code>ufold</code> function in the following way:</p>
-<pre class="codehilite"><code class="language-hs">ufold :: (Context a b -&gt; c -&gt; c) -&gt; c -&gt; Graph a b -&gt; c
-ufold f u Empty = u
-ufold f u (c &amp; g) = f c (ufold f u g)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="nf">ufold</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="p">(</span><span class="kt">Context</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Graph</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">c</span>
+<span class="nf">ufold</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="kt">Empty</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">u</span>
+<span class="nf">ufold</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">g</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="p">(</span><span class="n">ufold</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="n">g</span><span class="p">)</span>
+</code></pre></div>
 
 <p>This means: take a graph, a starting value of type <code>c</code>, and a function which takes something of type <code>c</code> and a <code>Context</code>
 to
@@ -142,57 +142,57 @@ another
 function as a parameter! <code>ufold</code> over an empty graph is just the starting value, but for anything else we extract an
 arbitrary context, then apply the function over that context and the result of <code>ufold</code> on the remainder. More recursion!</p>
 <p>Thankfully, this is actually pretty concise in Python:</p>
-<pre class="codehilite"><code class="language-python">class Graph(abc.ABC, typing.Generic[A, B]):
-    ...
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
 
-    def ufold(self, fn: typing.Callable[[Context[A, B], C], C], u: C) -&gt; C:
-        &quot;&quot;&quot;Un-ordered fold.&quot;&quot;&quot;
-        if self.is_empty:
-            return u
-        head, graph = self.pop()  # c &amp; g
-        return fn(head, graph.ufold(fn, u))  # f c (ufold f u g)
-</code></pre>
+    <span class="k">def</span> <span class="nf">ufold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Context</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="n">C</span><span class="p">],</span> <span class="n">C</span><span class="p">],</span> <span class="n">u</span><span class="p">:</span> <span class="n">C</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">C</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Un-ordered fold.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">u</span>
+        <span class="n">head</span><span class="p">,</span> <span class="n">graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  <span class="c1"># c &amp; g</span>
+        <span class="k">return</span> <span class="n">fn</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">graph</span><span class="o">.</span><span class="n">ufold</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">u</span><span class="p">))</span>  <span class="c1"># f c (ufold f u g)</span>
+</code></pre></div>
 
 <h2><code>nodes()</code></h2>
 <p>How do we use <code>.ufold()</code>? Well, let's say we want to get the nodes of the graph. In Haskell syntax, the function looks
 like this:</p>
-<pre class="codehilite"><code class="language-hs">nodes :: Graph a b -&gt; [Node]
-nodes = ufold (\(p, v, l, s) -&gt; (v:)) []
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="nf">nodes</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Graph</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">[</span><span class="kt">Node</span><span class="p">]</span>
+<span class="nf">nodes</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">ufold</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">v</span><span class="kt">:</span><span class="p">))</span><span class="w"> </span><span class="kt">[]</span>
+</code></pre></div>
 
 <p>In simple words, this says that the nodes of the graph are just appended one by one to an initially-empty list. In
 Python, it looks like this:</p>
-<pre class="codehilite"><code class="language-python">class Graph(abc.ABC, typing.Generic[A, B]):
-    ...
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
 
-    def nodes(self) -&gt; tuple[Node, ...]:
-        &quot;&quot;&quot;The nodes of the graph.&quot;&quot;&quot;
-        # ufold (\(p, v, l, s) -&gt; (v:)) []
-        return self.ufold(lambda context, result: (context.node, *result), ())
-</code></pre>
+    <span class="k">def</span> <span class="nf">nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The nodes of the graph.&quot;&quot;&quot;</span>
+        <span class="c1"># ufold (\(p, v, l, s) -&gt; (v:)) []</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ufold</span><span class="p">(</span><span class="k">lambda</span> <span class="n">context</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="n">result</span><span class="p">),</span> <span class="p">())</span>
+</code></pre></div>
 
 <p>That's pretty concise, and again it mirrors the Haskell definition pretty closely.</p>
 <h2><code>gmap()</code></h2>
 <p><code>gmap</code> is the graph's equivalent of <code>map</code> and we can use <code>ufold</code> to implement it!</p>
-<pre class="codehilite"><code class="language-hs">gmap :: (Context a b -&gt; Context c d) -&gt; Graph a b -&gt; Graph c d
-gmap f = ufold (\c -&gt; (f c &amp;)) Empty
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="nf">gmap</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="p">(</span><span class="kt">Context</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Context</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Graph</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Graph</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="n">d</span>
+<span class="nf">gmap</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">ufold</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">c</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">&amp;</span><span class="p">))</span><span class="w"> </span><span class="kt">Empty</span>
+</code></pre></div>
 
 <p>In other words, <code>gmap</code> is a function that takes a graph and a function that converts a context into another context, and
 produces another graph. We can implement it by applying the function to each context, and constructing a graph from the
 result. In Python:</p>
-<pre class="codehilite"><code class="language-python">class Graph(abc.ABC, typing.Generic[A, B]):
-    ...
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
 
-    def gmap(
-            self, fn: typing.Callable[[Context[A, B]], Context[C, D]]
-    ) -&gt; &quot;Graph[C, D]&quot;:
-        &quot;&quot;&quot;Convert the graph into another graph via `fn` over its contexts.&quot;&quot;&quot;
-        # ufold (\c -&gt; f c &amp;) Empty
-        return self.ufold(
-            lambda context, result: fn(context) &amp; result, EmptyGraph[C, D]()
-        )
-</code></pre>
+    <span class="k">def</span> <span class="nf">gmap</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Context</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]],</span> <span class="n">Context</span><span class="p">[</span><span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">]]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Graph[C, D]&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the graph into another graph via `fn` over its contexts.&quot;&quot;&quot;</span>
+        <span class="c1"># ufold (\c -&gt; f c &amp;) Empty</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ufold</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">context</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">fn</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">result</span><span class="p">,</span> <span class="n">EmptyGraph</span><span class="p">[</span><span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">]()</span>
+        <span class="p">)</span>
+</code></pre></div>
 
 <h1>Conclusion</h1>
 <p>The inductive graph definition requires just three features: a test for emptiness, the removal of an arbitrary node's
@@ -288,56 +288,56 @@ Python. I've generally adopted the following approach:</p>
 </ol>
 <h2>Node</h2>
 <p>The very first type described in the paper is the type</p>
-<pre class="codehilite"><code class="language-hs">type Node = Int
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="kt">Node</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Int</span>
+</code></pre></div>
 
 <p>That's right, nodes are integers. Actually, we can think of this as being like the index of an item in the list — the
 node type is the "index" of the node in the graph. In Python:</p>
-<pre class="codehilite"><code class="language-python">class Node(int):
-    &quot;&quot;&quot;A node.
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Node</span><span class="p">(</span><span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A node.</span>
 
-    For convenience, nodes are represented by integers.
-    &quot;&quot;&quot;
-</code></pre>
+<span class="sd">    For convenience, nodes are represented by integers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</code></pre></div>
 
 <p>Simple!</p>
 <h2>"Adj"</h2>
-<pre class="codehilite"><code class="language-hs">type Adj b = [(b, Node)]
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="kt">Adj</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[(</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="kt">Node</span><span class="p">)]</span>
+</code></pre></div>
 
 <p>This is a bit more abstract. It means that <code>Adj</code> is a sequence of tuples. Each tuple represents an edge in the graph,
 and
 <code>b</code> represents the edge's label, which can be anything, so we leave it generic. Note that edges are directed: <code>Adj</code> may
 describe a connection to or from a given node, but by itself it doesn't care which.</p>
-<pre class="codehilite"><code class="language-python">class Adj(collections.abc.Sequence[tuple[B, Node]]):
-    &quot;&quot;&quot;Adjacency relationships.&quot;&quot;&quot;
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Adj</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">B</span><span class="p">,</span> <span class="n">Node</span><span class="p">]]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adjacency relationships.&quot;&quot;&quot;</span>
 
-    labeled_nodes: tuple[tuple[B, Node], ...]
+    <span class="n">labeled_nodes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">B</span><span class="p">,</span> <span class="n">Node</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
 
-    def __init__(self, labeled_nodes: tuple[tuple[B, Node], ...] = ()):
-        self.labeled_nodes = labeled_nodes
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labeled_nodes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">B</span><span class="p">,</span> <span class="n">Node</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labeled_nodes</span> <span class="o">=</span> <span class="n">labeled_nodes</span>
 
-    def __repr__(self):
-        return f&quot;Adj({self.labeled_nodes!r})&quot;
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Adj(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">labeled_nodes</span><span class="si">!r}</span><span class="s2">)&quot;</span>
 
-    def __len__(self):
-        return len(self.labeled_nodes)
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labeled_nodes</span><span class="p">)</span>
 
-    def __getitem__(self, item):
-        return self.labeled_nodes[item]
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">labeled_nodes</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
 
-    def __eq__(self, other):
-        return self.labeled_nodes == other.labeled_nodes
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">labeled_nodes</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">labeled_nodes</span>
 
-    def __add__(self, other):
-        return Adj(self.labeled_nodes + other.labeled_nodes)
-</code></pre>
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Adj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labeled_nodes</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">labeled_nodes</span><span class="p">)</span>
+</code></pre></div>
 
 <p>I've made this class inherit from the Sequence class, which means if we implement <code>__len__</code> and <code>__getitem__</code> we get
 iteration for free. I've also specified <code>__eq__</code> and <code>__add__</code> so that the class behaves like a tuple.</p>
-<pre class="codehilite"><code class="language-hs">Context
-type Context a b = (Adj b, Node, a, Adj b)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kt">Context</span>
+<span class="kr">type</span><span class="w"> </span><span class="kt">Context</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Adj</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="kt">Node</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">Adj</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
+</code></pre></div>
 
 <p>More abstract again! This says that a "context" comprises four parts: an adjacency relationship, a node, the label of
 that node (<code>a</code>), and another adjacency relationship. The first <code>Adj</code> represents edges directed towards <code>Node</code>, called
@@ -353,86 +353,86 @@ not highlighted, points towards the last circle, and is labelled &quot;Another n
 <p><em>Anatomy of a "Context": predecessor edges pointing to this node, successor edges pointing away from this node, and a
 label of arbitrary type on the node itself. Note that a "Context" doesn't necessarily refer to all of the edges
 connecting into a node, because these might be parts of other "Context"s.</em></p>
-<pre class="codehilite"><code class="language-python">class Context(typing.Generic[A, B]):
-    &quot;&quot;&quot;A context.
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Context</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A context.</span>
 
-    A node's context describes (some of) its surroundings, including its label, its 
-    adjacent predecessors and its adjacent successors.
-    &quot;&quot;&quot;
+<span class="sd">    A node&#39;s context describes (some of) its surroundings, including its label, its </span>
+<span class="sd">    adjacent predecessors and its adjacent successors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    predecessors: Adj[B]
-    node: Node
-    label: A
-    successors: Adj[B]
+    <span class="n">predecessors</span><span class="p">:</span> <span class="n">Adj</span><span class="p">[</span><span class="n">B</span><span class="p">]</span>
+    <span class="n">node</span><span class="p">:</span> <span class="n">Node</span>
+    <span class="n">label</span><span class="p">:</span> <span class="n">A</span>
+    <span class="n">successors</span><span class="p">:</span> <span class="n">Adj</span><span class="p">[</span><span class="n">B</span><span class="p">]</span>
 
-    def __init__(
-            self,
-            predecessors: Adj[B],
-            node: Node,
-            label: A,
-            successors: Adj[B],
-    ):
-        self.predecessors = predecessors
-        self.node = node
-        self.label = label
-        self.successors = successors
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">predecessors</span><span class="p">:</span> <span class="n">Adj</span><span class="p">[</span><span class="n">B</span><span class="p">],</span>
+            <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span>
+            <span class="n">label</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span>
+            <span class="n">successors</span><span class="p">:</span> <span class="n">Adj</span><span class="p">[</span><span class="n">B</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predecessors</span> <span class="o">=</span> <span class="n">predecessors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">successors</span> <span class="o">=</span> <span class="n">successors</span>
 
-    def __repr__(self):
-        return f&quot;Context({self.predecessors!r}, {self.node!r}, {self.label!r}, {self.successors!r})&quot;
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Context(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">predecessors</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">successors</span><span class="si">!r}</span><span class="s2">)&quot;</span>
 
-    def __eq__(self, other):
-        return (
-                self.predecessors == other.predecessors
-                and self.node == other.node
-                and self.label == other.label
-                and self.successors == other.successors
-        )
-</code></pre>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">predecessors</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">predecessors</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">node</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">label</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">successors</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">successors</span>
+        <span class="p">)</span>
+</code></pre></div>
 
 <h2>Graph</h2>
 <p>Finally, we can describe a graph itself:</p>
-<pre class="codehilite"><code class="language-hs">data Graph a b = Empty | Context a b &amp; Graph a b
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kr">data</span><span class="w"> </span><span class="kt">Graph</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Empty</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Context</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="kt">Graph</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span>
+</code></pre></div>
 
 <p>This says that a graph is either an empty graph OR a context attached (using the operator <code>&amp;</code>) to a graph.</p>
 <p>Python doesn't have variant types like this, but we can use inheritance instead. We'll define an abstract <code>Graph</code> class
 that will have two subclasses: <code>EmptyGraph</code> and <code>InductiveGraph</code>.</p>
-<pre class="codehilite"><code class="language-python">class Graph(abc.ABC, typing.Generic[A, B]):
-    &quot;&quot;&quot;An abstract graph&quot;&quot;&quot; 
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An abstract graph&quot;&quot;&quot;</span> 
+</code></pre></div>
 
 <p>The <code>InductiveGraph</code> will contain a "head", which is the Context a b, and a "tail", which is another graph.</p>
-<pre class="codehilite"><code class="language-python">class EmptyGraph(Graph[A, B]):
-    &quot;&quot;&quot;An empty graph, containing no nodes or edges.&quot;&quot;&quot;
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">EmptyGraph</span><span class="p">(</span><span class="n">Graph</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An empty graph, containing no nodes or edges.&quot;&quot;&quot;</span>
 
-    def __repr__(self):
-        return &quot;EmptyGraph&quot;
-</code></pre>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;EmptyGraph&quot;</span>
+</code></pre></div>
 
-<pre class="codehilite"><code class="language-python">class InductiveGraph(Graph[A, B]):
-    &quot;&quot;&quot;An inductive graph.
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">InductiveGraph</span><span class="p">(</span><span class="n">Graph</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An inductive graph.</span>
 
-    The `head` of the graph is a context that can only refer to nodes in the `tail`,
-    which is also a graph.
-    &quot;&quot;&quot;
+<span class="sd">    The `head` of the graph is a context that can only refer to nodes in the `tail`,</span>
+<span class="sd">    which is also a graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    head: Context[A, B]
-    tail: Graph[A, B]
+    <span class="n">head</span><span class="p">:</span> <span class="n">Context</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]</span>
+    <span class="n">tail</span><span class="p">:</span> <span class="n">Graph</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]</span>
 
-    def __init__(self, head: Context[A, B], tail: Graph[A, B]):
-        self.head = head
-        self.tail = tail
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">head</span><span class="p">:</span> <span class="n">Context</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="n">tail</span><span class="p">:</span> <span class="n">Graph</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">head</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="n">tail</span>
 
-    def __repr__(self):
-        return f&quot;{self.head!r} &amp; {self.tail!r}&quot;
-</code></pre>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="si">!r}</span><span class="s2"> &amp; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tail</span><span class="si">!r}</span><span class="s2">&quot;</span>
+</code></pre></div>
 
 <h2>Construction</h2>
 <p>As well as the data itself, we can implement the constructor operator <code>&amp;</code> using Python! In the paper, we imagine
 building
 up graphs right-to-left, starting with the empty graph, and adding on context until we reach the whole graph:</p>
-<pre class="codehilite"><code class="language-python">Context(...) &amp; Context(...) &amp; Context(...) &amp; EmptyGraph()
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">Context</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Context</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Context</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">EmptyGraph</span><span class="p">()</span>
+</code></pre></div>
 
 <p><img alt="A diagram illustrating the construction of inductive graphs using the &quot;&amp;&quot; operator. At the top, a collection of circles,
 some of which have lines attached, are aligned with the &quot;&amp;&quot; operator separating them. On the right hand side is a circle
@@ -445,32 +445,32 @@ refer to nodes that are already in the graph.</em></p>
 <p>In Python, operators resolve left-to-right, so to emulate this behaviour I've introduced a _<code>ContextPartial</code> class which
 can collect up left-hand-side contexts until it reaches a graph, at which point it resolves. As a result, we can define
 the <code>__and__</code> operator on the <code>Context</code> class like so:</p>
-<pre class="codehilite"><code class="language-python">class Context(typing.Generic[A, B]):
-    def __and__(self, other):
-        match other:
-            case Context():
-                return _ContextPartial((other, self))
-            case InductiveGraph() if self.node in other.nodes():
-                raise NodeExistsError(
-                    f&quot;context {self} refers to existing node {self.node} in graph {other}&quot;
-                )
-            case InductiveGraph() if disjoint_nodes := tuple(
-                    node
-                    for node in self.pre + self.suc
-                    if node not in other.nodes() and node != self.node
-            ):
-                raise NodeDoesNotExistError(
-                    f&quot;context {self} &quot;
-                    f&quot;refers to adjacent nodes {disjoint_nodes} &quot;
-                    f&quot;which are not in graph {other}&quot;
-                )
-            case InductiveGraph() | EmptyGraph():
-                return InductiveGraph(self, other)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Context</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__and__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">match</span> <span class="n">other</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">Context</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">_ContextPartial</span><span class="p">((</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="k">case</span> <span class="n">InductiveGraph</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">nodes</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">NodeExistsError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;context </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> refers to existing node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="si">}</span><span class="s2"> in graph </span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">InductiveGraph</span><span class="p">()</span> <span class="k">if</span> <span class="n">disjoint_nodes</span> <span class="o">:=</span> <span class="nb">tuple</span><span class="p">(</span>
+                    <span class="n">node</span>
+                    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">suc</span>
+                    <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">nodes</span><span class="p">()</span> <span class="ow">and</span> <span class="n">node</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="n">NodeDoesNotExistError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;context </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;refers to adjacent nodes </span><span class="si">{</span><span class="n">disjoint_nodes</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;which are not in graph </span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">InductiveGraph</span><span class="p">()</span> <span class="o">|</span> <span class="n">EmptyGraph</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">InductiveGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+</code></pre></div>
 
 <p>This describes the behaviour when we do something like:</p>
-<pre class="codehilite"><code class="language-python">context_a &amp; context_b &amp; EmptyGraph()
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">context_a</span> <span class="o">&amp;</span> <span class="n">context_b</span> <span class="o">&amp;</span> <span class="n">EmptyGraph</span><span class="p">()</span>
+</code></pre></div>
 
 <p>When the context is added to an inductive graph where the node is already in the graph, or if the context's <code>Adj</code> nodes
 refer to nodes that are <em>not</em> in the graph, we have to raise an error. Otherwise, regardless of whether it is an
@@ -482,25 +482,25 @@ the next part!</p>
 <h1>Usage</h1>
 <p>After these definitions, we're ready to follow the first example in the paper, Figure 1, which constructs a graph using
 edges labeled "left", "right", "up", and "down", and nodes labeled "a", "b", and "c".</p>
-<pre class="codehilite"><code class="language-hs">([(&quot;left&quot;, 2), (&quot;up&quot;, 3)], 1, &quot;a&quot;, [(&quot;right&quot;, 2)]) &amp;
-([], 2, &quot;b&quot;, [(&quot;down&quot;, 3)]) &amp;
-([], 3, &quot;c&quot;, []) &amp;
-Empty
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="p">([(</span><span class="s">&quot;left&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;up&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)],</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[(</span><span class="s">&quot;right&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)])</span><span class="w"> </span><span class="o">&amp;</span>
+<span class="p">(</span><span class="kt">[]</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[(</span><span class="s">&quot;down&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)])</span><span class="w"> </span><span class="o">&amp;</span>
+<span class="p">(</span><span class="kt">[]</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;c&quot;</span><span class="p">,</span><span class="w"> </span><span class="kt">[]</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span>
+<span class="kt">Empty</span>
+</code></pre></div>
 
 <p>becomes in Python:</p>
-<pre class="codehilite"><code class="language-python">graph: InductiveGraph[str, str] = (
-        Context(
-            Adj(((&quot;left&quot;, Node(2)), (&quot;up&quot;, Node(3)))),
-            Node(1),
-            &quot;a&quot;,
-            Adj(((&quot;right&quot;, Node(2)),)),
-        )
-        &amp; Context(Adj(), Node(2), &quot;b&quot;, Adj(((&quot;down&quot;, Node(3)),)))
-        &amp; Context(Adj(), Node(3), &quot;c&quot;, Adj())
-        &amp; EmptyGraph()
-)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">graph</span><span class="p">:</span> <span class="n">InductiveGraph</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Context</span><span class="p">(</span>
+            <span class="n">Adj</span><span class="p">(((</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="p">(</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">3</span><span class="p">)))),</span>
+            <span class="n">Node</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="s2">&quot;a&quot;</span><span class="p">,</span>
+            <span class="n">Adj</span><span class="p">(((</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">)),)),</span>
+        <span class="p">)</span>
+        <span class="o">&amp;</span> <span class="n">Context</span><span class="p">(</span><span class="n">Adj</span><span class="p">(),</span> <span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">Adj</span><span class="p">(((</span><span class="s2">&quot;down&quot;</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">3</span><span class="p">)),)))</span>
+        <span class="o">&amp;</span> <span class="n">Context</span><span class="p">(</span><span class="n">Adj</span><span class="p">(),</span> <span class="n">Node</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">Adj</span><span class="p">())</span>
+        <span class="o">&amp;</span> <span class="n">EmptyGraph</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div>
 
 <p><img alt="A diagram reproducing the example in Erwig 2001, showing a directed graph with three nodes connected by four edges." src="example_graph.png" /></p>
 <p><em>The node "a", with two predecessors and one successor, is attached to "b", with one successor, and then attached to "c",
@@ -662,8 +662,8 @@ to write to get things working again. It sounds obvious, but a lot of the actual
 minutes spent on a programming project for me are spent working out the correct
 order of operations.</p>
 <p>For this project, the relevant command is a simple</p>
-<pre class="codehilite"><code>docker-compose build &amp;&amp; docker-compose run main
-</code></pre>
+<div class="codehilite"><pre><span></span><code>docker-compose build &amp;&amp; docker-compose run main
+</code></pre></div>
 
 <p>but in a web project with multiple moving parts these kinds of crucial lines
 can be easy to forget or get lost in a maze of possible, often redundant (in
