@@ -15,6 +15,200 @@
         <article>
             <h1 class="post-title">
           <span class="line">
+            <a id="2022-12-26-functional_graph_algorithms_2" href="#2022-12-26-functional_graph_algorithms_2">Implementing Functional Graph Algorithms in Python (Part 2: Functions)</a>
+          </span>
+                
+                    <span class="line"><small>2022-12-26</small></span>
+                
+            </h1>
+            <p><em>This article was originally published on
+Medium (<a href="https://medium.com/@benhmartineau/implementing-functional-graph-algorithms-in-python-part-2-functions-cf15e640c7c3">link</a>)</em></p>
+<p>Hello! Welcome to the second part of this series on functional programming in Python. If you haven’t read the first part
+yet, check it out <a href="#2022-12-19-functional_graph_algorithms_1">here</a>.</p>
+<p>In this series, we’re implementing “inductive graphs” as described
+in <a href="https://www.cambridge.org/core/journals/journal-of-functional-programming/article/inductive-graphs-and-functional-graph-algorithms/2210F7C31A34EA4CF5008ED9E7B4EF62">this paper</a> (
+Erwig 2001). In the first part, we
+defined the basic data structures, and we’ll now move on to implementing the necessary abstract methods and some basic
+algorithms. As a reminder, you can find all of the code for these articles at
+the <a href="https://github.com/bm424/inductive-graph-algorithms"><code>inductive-graph-algorithms</code></a> repository
+over on GitHub.</p>
+<h1>Abstract Methods</h1>
+<p>Take a look at Table 1 in the paper. It explains that for inductive graph algorithms, we need three basic features for
+the graph:</p>
+<ol>
+<li>A test for emptiness.</li>
+<li>The ability to extract an arbitrary context from the graph.</li>
+<li>The ability to extract a specific context from the graph.</li>
+</ol>
+<p>How we choose to implement these features is up to us. I’ve chosen to implement the test for emptiness as a property of
+the graph, and the context extraction as a method <code>.pop(node: Optional[Node])</code> on the graph:</p>
+<pre class="codehilite"><code class="language-python">class Graph(abc.ABC, typing.Generic[A, B]):
+    ...
+
+    @property
+    @abc.abstractmethod
+    def is_empty(self) -&gt; bool:
+        &quot;&quot;&quot;True if the graph is empty (contains no nodes), False otherwise.&quot;&quot;&quot;
+
+    @abc.abstractmethod
+    def pop(self, node: Node | None = None) -&gt; tuple[Context[A, B], &quot;Graph[A, B]&quot;] | None:
+        &quot;&quot;&quot;Extracts a given `node` from the graph.
+
+        Returns the node's context, and the remaining graph. If `node` is None, any
+        node may be extracted. If `node` is not in the graph, returns None.
+        &quot;&quot;&quot;
+</code></pre>
+
+<p>Now let’s implement these for our subtypes! For the empty graph, it’s easy enough:</p>
+<pre class="codehilite"><code class="language-python">class EmptyGraph(Graph[A, B]):
+    ...
+
+    @property
+    def is_empty(self) -&gt; bool:
+        return True
+
+    def pop(self, node: Node | None = None) -&gt; tuple[Context[A, B], &quot;Graph[A, B]&quot;] | None:
+        return None
+</code></pre>
+
+<p>The empty graph is, obviously, empty, and we can never extract any context from it.</p>
+<p>The inductive graph implementation is more complicated:</p>
+<pre class="codehilite"><code class="language-python">class InductiveGraph(Graph[A, B]):
+    ...
+
+    @property
+    def is_empty(self) -&gt; bool:
+        return False
+
+    def pop(self, node: Node | None = None) -&gt; tuple[Context[A, B], &quot;Graph[A, B]&quot;] | None:
+        if node is None or node == self.head.node:
+            return self.head, self.tail
+        node_context, graph_context = self.head.pop(node)
+        if match := self.tail.pop(node):
+            sub_node_context, subgraph = match
+            return node_context | sub_node_context, graph_context &amp; subgraph
+        return None
+</code></pre>
+
+<p>Let’s dig into <code>pop</code> here.</p>
+<p>First, if <code>node</code> is <code>None</code>, it means we can return any arbitrary context alongside the remaining graph. The way we’ve
+implemented <code>InductiveGraph</code> makes this very easy — we simply return the head, which is a context, and the tail, which
+by
+construction never refers to any node mentioned in the head. We can do exactly the same if the specific node requested
+happens to be the head node.</p>
+<p>If neither of the two conditions above is satisfied, it’s time for some recursion! First, we take the head context and
+split it into two parts. The first part contains any references to node, inverted so that <code>node</code> is the node of the
+context — this is <code>node_context</code>. The second part contains any references that are not to <code>node</code>.</p>
+<p><img alt="An illustration of how the &quot;head&quot; node of a graph is decomposed into two contexts. One context, called &quot;node_context&quot;, centres on &quot;node&quot;, and contains only references between &quot;node&quot; and &quot;head&quot;. The other context, called the &quot;graph_context&quot;, centres on &quot;head&quot;, and contains only any
+_other_ references to &quot;head&quot;." src="graph_context_pop.png" /></p>
+<p><em>Splitting the head into component parts.</em></p>
+<p>Then, we try to pop <code>node</code> from <code>tail</code>, meaning that we start again with <code>pop</code>! Eventually, we must either reach <code>node</code>,
+or find
+that <code>node</code> is not in the graph. Either way, the recursion terminates at some point.</p>
+<p>What happens if we reach <code>node</code>? <code>pop</code> returns a tuple of <code>node_context | sub_node_context</code>
+and <code>graph_context &amp; subgraph</code>. The
+first part of this joins all of the node_contexts together into a single context - the one we want extracted! Every
+reference to <code>node</code> in the graph is encapsulated in a new context with <code>node</code> at the center. The second part
+re-constructs a
+graph from all of the contexts which don't contain <code>node</code> - the remainder.</p>
+<p>That's a lot of behaviour wrapped up in one little function, so let's go over it slowly once more.</p>
+<ol>
+<li>If the head is the context of the node we need, return it and the remaining graph.</li>
+<li>Otherwise, break the head into parts. One part contains any references to the node we need, the other part contains
+   no references to the node we need.</li>
+<li>Repeat the above process with the tail.</li>
+<li>Once we have the context of the node we need, join all the contexts that do reference the node into our extracted
+   context, and construct a graph from the contexts that do not reference the node.</li>
+</ol>
+<p>Phew 😅 With that tricky part out the way, we can get on to some sweet implementations!</p>
+<h1>Basic Functions</h1>
+<p>Back in Part 1, I said that we could define functions on inductive graphs analogous to <code>reduce</code> and <code>map</code> for lists.
+Let's
+do that now!</p>
+<h2><code>ufold()</code></h2>
+<p>In the paper, <code>reduce</code> for graphs is called <code>ufold</code>. <code>fold</code> is an often-used synonym for <code>reduce</code> in functional
+programming, and
+<code>ufold</code> means the fold on graphs is "unordered," because the nodes are, in general, traversed in arbitrary order.</p>
+<p>The paper describes the <code>ufold</code> function in the following way:</p>
+<pre class="codehilite"><code class="language-hs">ufold :: (Context a b -&gt; c -&gt; c) -&gt; c -&gt; Graph a b -&gt; c
+ufold f u Empty = u
+ufold f u (c &amp; g) = f c (ufold f u g)
+</code></pre>
+
+<p>This means: take a graph, a starting value of type <code>c</code>, and a function which takes something of type <code>c</code> and a <code>Context</code>
+to
+produce a result <code>c</code>. <code>ufold</code> will then produce a result of type <code>c</code>. Yes, it's a higher-order function which takes
+another
+function as a parameter! <code>ufold</code> over an empty graph is just the starting value, but for anything else we extract an
+arbitrary context, then apply the function over that context and the result of <code>ufold</code> on the remainder. More recursion!</p>
+<p>Thankfully, this is actually pretty concise in Python:</p>
+<pre class="codehilite"><code class="language-python">class Graph(abc.ABC, typing.Generic[A, B]):
+    ...
+
+    def ufold(self, fn: typing.Callable[[Context[A, B], C], C], u: C) -&gt; C:
+        &quot;&quot;&quot;Un-ordered fold.&quot;&quot;&quot;
+        if self.is_empty:
+            return u
+        head, graph = self.pop()  # c &amp; g
+        return fn(head, graph.ufold(fn, u))  # f c (ufold f u g)
+</code></pre>
+
+<h2><code>nodes()</code></h2>
+<p>How do we use <code>.ufold()</code>? Well, let's say we want to get the nodes of the graph. In Haskell syntax, the function looks
+like this:</p>
+<pre class="codehilite"><code class="language-hs">nodes :: Graph a b -&gt; [Node]
+nodes = ufold (\(p, v, l, s) -&gt; (v:)) []
+</code></pre>
+
+<p>In simple words, this says that the nodes of the graph are just appended one by one to an initially-empty list. In
+Python, it looks like this:</p>
+<pre class="codehilite"><code class="language-python">class Graph(abc.ABC, typing.Generic[A, B]):
+    ...
+
+    def nodes(self) -&gt; tuple[Node, ...]:
+        &quot;&quot;&quot;The nodes of the graph.&quot;&quot;&quot;
+        # ufold (\(p, v, l, s) -&gt; (v:)) []
+        return self.ufold(lambda context, result: (context.node, *result), ())
+</code></pre>
+
+<p>That's pretty concise, and again it mirrors the Haskell definition pretty closely.</p>
+<h2><code>gmap()</code></h2>
+<p><code>gmap</code> is the graph's equivalent of <code>map</code> and we can use <code>ufold</code> to implement it!</p>
+<pre class="codehilite"><code class="language-hs">gmap :: (Context a b -&gt; Context c d) -&gt; Graph a b -&gt; Graph c d
+gmap f = ufold (\c -&gt; (f c &amp;)) Empty
+</code></pre>
+
+<p>In other words, <code>gmap</code> is a function that takes a graph and a function that converts a context into another context, and
+produces another graph. We can implement it by applying the function to each context, and constructing a graph from the
+result. In Python:</p>
+<pre class="codehilite"><code class="language-python">class Graph(abc.ABC, typing.Generic[A, B]):
+    ...
+
+    def gmap(
+            self, fn: typing.Callable[[Context[A, B]], Context[C, D]]
+    ) -&gt; &quot;Graph[C, D]&quot;:
+        &quot;&quot;&quot;Convert the graph into another graph via `fn` over its contexts.&quot;&quot;&quot;
+        # ufold (\c -&gt; f c &amp;) Empty
+        return self.ufold(
+            lambda context, result: fn(context) &amp; result, EmptyGraph[C, D]()
+        )
+</code></pre>
+
+<h1>Conclusion</h1>
+<p>The inductive graph definition requires just three features: a test for emptiness, the removal of an arbitrary node's
+context, and the removal of a specific node's context. With those in place, we can create some very succinct functions
+to form the basis of our functional graphs: <code>ufold</code>, and <code>gmap</code>.</p>
+<p>In the next part, we'll implement some more complex algorithms including Dijkstra's algorithm and topological sorting.</p>
+<h1>References</h1>
+<ol>
+<li>Erwig, Martin. "Inductive graphs and functional graph algorithms." <em>Journal of Functional Programming</em> 11.5 (2001):
+   467–492.</li>
+</ol>
+        </article>
+    
+        <article>
+            <h1 class="post-title">
+          <span class="line">
             <a id="2022-12-19-functional_graph_algorithms_1" href="#2022-12-19-functional_graph_algorithms_1">Implementing Functional Graph Algorithms in Python (Part 1: Data Types)</a>
           </span>
                 
@@ -586,6 +780,8 @@ read this far, thanks! And see you next time.</p>
 <footer>
     <nav>
         <ol>
+            
+                <li><a href="#2022-12-26-functional_graph_algorithms_2">2022-12-26</a></li>
             
                 <li><a href="#2022-12-19-functional_graph_algorithms_1">2022-12-19</a></li>
             
