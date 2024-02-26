@@ -1,6 +1,6 @@
 # Local Build
 
-```
+```shell
 docker compose build && docker compose run main
 ```
 
