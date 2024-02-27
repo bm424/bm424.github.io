@@ -1,0 +1,229 @@
+<p><em>This article was originally published on
+Medium (<a href="https://medium.com/@benhmartineau/implementing-functional-graph-algorithms-in-python-part-3-algorithms-a305751f9d41">link</a>)</em></p>
+<hr />
+<p>Welcome back to this series on functional programming in Python! We’ve been looking at how to implement <a href="https://www.cambridge.org/core/journals/journal-of-functional-programming/article/inductive-graphs-and-functional-graph-algorithms/2210F7C31A34EA4CF5008ED9E7B4EF62">inductive
+graphs</a> (
+Erwig 2001) in Python. In the <a href="#2022-12-19-functional_graph_algorithms_1">first part</a>, we looked at how to implement the
+necessary data types, and in the <a href="#2022-12-26-functional_graph_algorithms_2">second part</a> we implemented some basic
+functions.</p>
+<p>In this section, I’ll show you how to implement topological sorting and Dijkstra’s algorithm for shortest paths using
+the methods described in the paper. We’ll use new Python features like <code>match</code> statements to get very close to the
+declarative Haskell description of these algorithms.</p>
+<h1>Topological Sorting</h1>
+<p>A <a href="https://en.wikipedia.org/wiki/Topological_sorting">topological sort</a> of a graph is a list of its nodes which are
+followed in an order where “earlier” nodes come before "later" nodes (for a more precise definition see the linked
+Wikipedia article). Strictly speaking, this is only possible if the graph is acyclic — this means there are no loops.
+It’s useful for resolving the “order” that processes should be evaluated in if, for example, your graph represents data
+flow. Topological sorts are not unique.</p>
+<h2>Depth-First Forest</h2>
+<p>The paper describes an inductive graph algorithm for the topological sort which relies on a "depth-first forest" which
+can be derived from the graph. What is this?</p>
+<p><img alt="A single graph with seven nodes, the first two labeled 'a' and 'b', with directed edges joining some of the other nodes. An arrow labeled 'dff' shows the transformation to the depth first forest. The forest shows the same seven nodes, but 'a' and 'b' now represent the roots of two separate subtrees." src="depth_first_forest.png" /></p>
+<p><em>An illustration of the operation of "depth first forest" on a graph.</em></p>
+<p>We can decompose the graph into a number of “trees”. Trees are like graphs but nodes only ever have one predecessor.
+Starting at any node, we can get a single tree by removing it and following successors until we run out of nodes. To get
+the forest, we just need to start searching from all nodes. The algorithm described in Haskell notation looks like this:</p>
+<div class="codehilite"><pre><span></span><code><span class="nf">df</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="p">[</span><span class="kt">Node</span><span class="p">]</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Graph</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">([</span><span class="kt">Tree</span><span class="w"> </span><span class="kt">Node</span><span class="p">],</span><span class="w"> </span><span class="kt">Graph</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
+<span class="nf">df</span><span class="w"> </span><span class="kt">[]</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">[]</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">)</span>
+<span class="nf">df</span><span class="w"> </span><span class="p">(</span><span class="n">v</span><span class="kt">:</span><span class="n">vs</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v</span><span class="w"> </span><span class="n">g</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Br</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="n">f</span><span class="kt">:</span><span class="n">f&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">g₂</span><span class="p">)</span><span class="w"> </span><span class="kr">where</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">g₁</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="p">(</span><span class="n">suc</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="n">g</span><span class="p">;</span><span class="w"> </span><span class="p">(</span><span class="n">f&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">g₂</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="n">vs</span><span class="w"> </span><span class="n">g₁</span>
+<span class="nf">df</span><span class="w"> </span><span class="p">(</span><span class="n">v</span><span class="kt">:</span><span class="n">vs</span><span class="p">)</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="n">vs</span><span class="w"> </span><span class="n">g</span>
+</code></pre></div>
+
+<h2>Implementation</h2>
+<p>Phew! That’s a confusing definition. Let’s break it down in Python. Firstly, the function says that given a queue of
+nodes <code>[Node]</code> and a graph <code>Graph a b</code>, <code>df</code> returns a tuple (a Haskell-style tuple with a fixed length). The first
+element of
+the tuple is a queue of trees of nodes, and the second is a graph. Since we’re using methods to implement these
+functions in Python, it’s almost the same:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Tree</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="s2">&quot;Graph[A, B]&quot;</span><span class="p">]:</span>
+        <span class="o">...</span>
+</code></pre></div>
+
+<p>The next line, <code>df [] g = ([], g)</code>, says that if there are no nodes, we just return an empty tuple and the graph itself:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Tree</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="s2">&quot;Graph[A, B]&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(),</span> <span class="bp">self</span>
+        <span class="o">...</span>
+</code></pre></div>
+
+<p>The line after this, <code>df (v:vs) (c &amp;v g) = (Br v f:f', g₂) where (f, g₁) = df (suc c) g; (f', g₂) = df vs g₁</code>, says: if
+we
+can find the first node, <code>v</code>, in the graph, then calculate the forest for all of the successors of that node in the
+graph
+<em>without</em> that node. Then, carry on calculating trees with whatever nodes <code>vs</code> we haven’t yet looked at. We then
+construct a
+tree with the node at the head of the forest of successors, then return it alongside all the other trees we’ve found.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Tree</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="s2">&quot;Graph[A, B]&quot;</span><span class="p">]:</span>
+        <span class="o">...</span>
+        <span class="n">head</span><span class="p">,</span> <span class="o">*</span><span class="n">tail</span> <span class="o">=</span> <span class="n">nodes</span>  <span class="c1"># (v:vs)</span>
+        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">head</span><span class="p">):</span>  <span class="c1"># (c &amp;v g)</span>
+            <span class="k">case</span> <span class="n">c</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">g1</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">_dff</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">suc</span><span class="p">)</span>  <span class="c1"># (f, g1) = df (suc c) g</span>
+                <span class="n">f_</span><span class="p">,</span> <span class="n">g2</span> <span class="o">=</span> <span class="n">g1</span><span class="o">.</span><span class="n">_dff</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">tail</span><span class="p">))</span>  <span class="c1"># (f&#39;, g2) = df vs g1</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">Tree</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="o">*</span><span class="n">f_</span><span class="p">),</span> <span class="n">g2</span>  <span class="c1"># (Br v f:f&#39;, g2)</span>
+</code></pre></div>
+
+<p>Why have I used match-case here? Well, what happens if we can’t find the node <code>v</code> in the graph? We just carry on with
+the
+other nodes, as in the final line of the algorithm <code>df (v:vs) g = df vs g</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Tree</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="s2">&quot;Graph[A, B]&quot;</span><span class="p">]:</span>
+        <span class="o">...</span>
+        <span class="n">head</span><span class="p">,</span> <span class="o">*</span><span class="n">tail</span> <span class="o">=</span> <span class="n">nodes</span>  <span class="c1"># (v:vs)</span>
+        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">head</span><span class="p">):</span>  <span class="c1"># (c &amp;v g)</span>
+            <span class="k">case</span> <span class="n">c</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span>
+                <span class="o">...</span>
+            <span class="n">case</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dff</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">tail</span><span class="p">))</span>  <span class="c1"># df vs g</span>
+</code></pre></div>
+
+<p>So the match statement allows a nice clean syntax demonstrating both cases.</p>
+<p>Finally, we can wrap the whole thing in a public <code>dff</code> method which just passes all of the graph’s nodes into the
+function, so that we get back a forest that spans the whole graph:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Tree</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="s2">&quot;Graph[A, B]&quot;</span><span class="p">]</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">dff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div>
+
+<p>The topological sort of the graph is derived from the depth-first spanning forest. We can walk through each tree from
+the bottom up (using a function called <code>postOrder</code>). The reverse of this sequence is a topological sort!</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Tree</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="s2">&quot;Graph[A, B]&quot;</span><span class="p">]</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">dff</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Tree</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">topsort</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">concat_map</span><span class="p">(</span><span class="n">Tree</span><span class="o">.</span><span class="n">post_order</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dff</span><span class="p">())))</span>
+</code></pre></div>
+
+<p>Isn't that sweet?</p>
+<h1>Dijkstra's Shortest Path Algorithm</h1>
+<p>Finally, let’s implement the inductive graph version of Dijkstra’s shortest path algorithm. There’s a bit of underlying
+machinery here involving what the paper calls <code>LRTrees</code> and <code>LPaths</code> which I won’t get in to here, but feel free to take
+a
+look at the code. The important thing for the implementation is that <code>LPaths</code> are labeled lists of nodes which can be
+compared using <code>&lt;</code> — i.e. one is “shorter” than another. This means they can be used in a heap.</p>
+<h2>Definition</h2>
+<div class="codehilite"><pre><span></span><code><span class="nf">dijkstra</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Real</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=&gt;</span><span class="w"> </span><span class="kt">Heap</span><span class="w"> </span><span class="p">(</span><span class="kt">LPath</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Graph</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">LRTree</span><span class="w"> </span><span class="n">b</span>
+</code></pre></div>
+
+<p>This says that for a graph with node edges labeled with a real number, and a heap (a data structure where we can
+efficiently get the smallest value) of paths, <code>dijkstra</code> will return a <code>LRTree</code> (a queue of labeled paths) representing
+the shortest paths between a given node and all other reachable nodes.</p>
+<div class="codehilite"><pre><span></span><code><span class="nf">dijkstra</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isEmptyHeap</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">isEmpty</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">[]</span>
+</code></pre></div>
+
+<p>Simple enough: there are no short paths in an empty graph. For non-empty graphs, the heap should never be empty, because
+we always have a zero-length path from a node to itself.</p>
+<div class="codehilite"><pre><span></span><code><span class="nf">dijkstra</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="o">@</span><span class="p">((</span><span class="n">v</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="kt">:</span><span class="kr">_</span><span class="p">)</span><span class="err">≺</span><span class="n">h</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v</span><span class="w"> </span><span class="n">g</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">p</span><span class="kt">:</span><span class="n">dijkstra</span><span class="w"> </span><span class="p">(</span><span class="n">mergeAll</span><span class="w"> </span><span class="n">h</span><span class="kt">:</span><span class="n">expand</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="n">c</span><span class="p">))</span><span class="w"> </span><span class="n">g</span>
+</code></pre></div>
+
+<p>😱 What is this nightmare? In words, it says: if the first node <code>v</code> in the smallest path <code>p</code> in the heap can be found in
+the graph, return that path and keep searching with <code>v</code> removed and a heap with that path removed and a set of new paths
+starting at all the successors. What this means is that when a new, shorter path to a given node is found it replaces
+the existing one.</p>
+<p>Finally, if the shortest path’s first node <code>v</code> is not in the graph, we can just carry on with trying to find shorter
+paths than the ones we’ve got:</p>
+<div class="codehilite"><pre><span></span><code><span class="nf">dijkstra</span><span class="w"> </span><span class="p">(</span><span class="kr">_</span><span class="err">≺</span><span class="n">h</span><span class="p">)</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">dijkstra</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="n">g</span>
+</code></pre></div>
+
+<h2>Implementation</h2>
+<p>Like the topological sort, this algorithm maps very nicely to Python. I’ve included the _<code>expand</code> method for
+completeness:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_expand</span><span class="p">(</span>
+            <span class="n">item</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lpath</span><span class="p">:</span> <span class="s2">&quot;LPath[float]&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Context</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ImmutableHeap</span><span class="p">[</span><span class="s2">&quot;LPath[float]&quot;</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">ImmutableHeap</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">LPath</span><span class="p">((</span><span class="n">LNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">item</span> <span class="o">+</span> <span class="n">label</span><span class="p">),</span> <span class="o">*</span><span class="n">lpath</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">successors</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_dijkstra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heap</span><span class="p">:</span> <span class="n">ImmutableHeap</span><span class="p">[</span><span class="s2">&quot;LPath[float]&quot;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;LRTree[float]&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">heap</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>  <span class="c1"># isEmptyHeap h || isEmpty g</span>
+            <span class="k">return</span> <span class="n">LRTree</span><span class="p">()</span>
+        <span class="n">p</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">heap</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  <span class="c1"># p &lt; h</span>
+        <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">d</span><span class="p">),</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">p</span>  <span class="c1"># p@((v, d): _)</span>
+        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>  <span class="c1"># c &amp;v g</span>
+            <span class="k">case</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">LRTree</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="o">*</span><span class="n">g</span><span class="o">.</span><span class="n">_dijkstra</span><span class="p">(</span><span class="n">ImmutableHeap</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_expand</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">c</span><span class="p">))))</span>
+                <span class="p">)</span>  <span class="c1"># p:dijkstra (mergeAll (h:expand d p c) g</span>
+            <span class="n">case</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dijkstra</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>  <span class="c1"># dijkstra h g</span>
+</code></pre></div>
+
+<p>With a list of shortest paths, we now just need some wrapper functions to complete the implementation:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Graph</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">_spt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;LRTree[float]&quot;</span><span class="p">:</span>
+        <span class="n">heap</span> <span class="o">=</span> <span class="n">ImmutableHeap</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">LPath</span><span class="p">((</span><span class="n">LNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dijkstra</span><span class="p">(</span><span class="n">heap</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">sp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Note that there is a typo in the linked version of the paper which incorrectly defines <code>spt</code>, i.e. the shortest paths
+from <code>t</code>, as</p>
+<div class="codehilite"><pre><span></span><code><span class="nf">spt</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">spt</span><span class="w"> </span><span class="p">(</span><span class="n">unitheap</span><span class="w"> </span><span class="p">[(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)])</span>
+</code></pre></div>
+
+<p>where it should read</p>
+<div class="codehilite"><pre><span></span><code><span class="nf">spt</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">dijkstra</span><span class="w"> </span><span class="p">(</span><span class="n">unitheap</span><span class="w"> </span><span class="p">[(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)])</span>
+</code></pre></div>
+
+<h2>Validation</h2>
+<p>Let’s check it works! Wikipedia has an article on Dijkstra’s algorithm where it shows a simple small graph labeled 1–6.</p>
+<p><img alt="An animation demonstrating Dijkstra's algorithm implemented the 'normal' way, showing an undirected, labeled graph with six nodes. Starting at the node labeled '1', the animation shows how each node is visited in turn and tagged with a value representing the shortest path to that node, until the shortest path to the destination is tagged. The final shortest path is 1, 3, 6, 5, with a total length of 20" src="https://upload.wikimedia.org/wikipedia/commons/5/57/Dijkstra_Animation.gif" /></p>
+<p><a href="https://en.wikipedia.org/wiki/File:Dijkstra_Animation.gif"><em>https://en.wikipedia.org/wiki/File:Dijkstra_Animation.gif</em></a></p>
+<p>The shortest graph from Node 1 to Node 5 goes through 3 and 6. Given everything we’ve implemented so far, we can now
+construct this graph with all the edges and test our algorithm:</p>
+<div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">graph</span> <span class="o">=</span> <span class="p">(</span>
+<span class="gp">... </span>    <span class="n">Context</span><span class="p">(</span><span class="n">Adj</span><span class="p">(),</span> <span class="n">Node</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Adj</span><span class="p">(((</span><span class="mi">7</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">3</span><span class="p">)),</span> <span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">6</span><span class="p">)))))</span>
+<span class="gp">... </span>    <span class="o">&amp;</span> <span class="n">Context</span><span class="p">(</span><span class="n">Adj</span><span class="p">(),</span> <span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Adj</span><span class="p">(((</span><span class="mi">10</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">3</span><span class="p">)),</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">4</span><span class="p">)))))</span>
+<span class="gp">... </span>    <span class="o">&amp;</span> <span class="n">Context</span><span class="p">(</span><span class="n">Adj</span><span class="p">(),</span> <span class="n">Node</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="mi">3</span><span class="p">,</span> <span class="n">Adj</span><span class="p">(((</span><span class="mi">11</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">6</span><span class="p">)))))</span>
+<span class="gp">... </span>    <span class="o">&amp;</span> <span class="n">Context</span><span class="p">(</span><span class="n">Adj</span><span class="p">(),</span> <span class="n">Node</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="mi">4</span><span class="p">,</span> <span class="n">Adj</span><span class="p">(((</span><span class="mi">6</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)),)))</span>
+<span class="gp">... </span>    <span class="o">&amp;</span> <span class="n">Context</span><span class="p">(</span><span class="n">Adj</span><span class="p">(),</span> <span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="mi">5</span><span class="p">,</span> <span class="n">Adj</span><span class="p">(((</span><span class="mi">9</span><span class="p">,</span> <span class="n">Node</span><span class="p">(</span><span class="mi">6</span><span class="p">)),)))</span>
+<span class="gp">... </span>    <span class="o">&amp;</span> <span class="n">Context</span><span class="p">(</span><span class="n">Adj</span><span class="p">(),</span> <span class="n">Node</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span> <span class="mi">6</span><span class="p">,</span> <span class="n">Adj</span><span class="p">())</span>
+<span class="gp">... </span>    <span class="o">&amp;</span> <span class="n">EmptyGraph</span><span class="p">()</span>
+<span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">undir</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">graph</span><span class="o">.</span><span class="n">sp</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="go">(1, 3, 6, 5)</span>
+</code></pre></div>
+
+<p>That puts a smile on my face.</p>
+<h1>Conclusion</h1>
+<p>We’ve seen how to implement some functional algorithms for graphs in Python, and how closely we can approach the Haskell
+descriptions using Python syntax like destructuring and <code>match</code> statements. In the next and final part I’m going to give
+my overall thoughts about this exercise, and draw some conclusions about functional programming in Python. See you
+there!</p>
+<h1>References</h1>
+<ol>
+<li>Erwig, Martin. “Inductive graphs and functional graph algorithms.” <em>Journal of Functional Programming</em> 11.5 (2001):
+   467–492.</li>
+</ol>
