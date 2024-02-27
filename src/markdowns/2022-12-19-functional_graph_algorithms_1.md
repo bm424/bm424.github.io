@@ -4,6 +4,8 @@ Date: 2022-12-19 00:00
 _This article was originally published on
 Medium ([link](https://medium.com/@benhmartineau/implementing-functional-graph-algorithms-in-python-part-1-data-types-b9ef1e3742e5))_
 
+---
+
 If you've ever read articles about functional programming in Python, you probably already know about `map`, `filter`, and
 `reduce`, which are useful functions for functional programming using lists. However, if you're like me, you may have
 sometimes felt that articles like that are a bit shallow, and don't really teach you anything about how to use Python as

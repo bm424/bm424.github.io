@@ -4,6 +4,8 @@ Date: 2022-12-26 00:00
 _This article was originally published on
 Medium ([link](https://medium.com/@benhmartineau/implementing-functional-graph-algorithms-in-python-part-2-functions-cf15e640c7c3))_
 
+---
+
 Hello! Welcome to the second part of this series on functional programming in Python. If you haven’t read the first part
 yet, check it out [here](#2022-12-19-functional_graph_algorithms_1).
 
